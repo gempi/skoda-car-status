@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/gempi/skoda-car-status/compare/v1.0.1...v1.0.2) (2026-11-09)
+
+
+### Bug Fixes
+
+* restrict CI workflow token to read-only permissions ([b8ceca1](https://github.com/gempi/skoda-car-status/commit/b8ceca13d96238fcacc9ca02f1a691bab3e28cc0))
+
 ## [1.0.1](https://github.com/gempi/skoda-car-status/compare/v1.0.0...v1.0.1) (2026-11-09)
 
 
