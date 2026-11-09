@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/gempi/skoda-car-status/compare/v1.0.0...v1.0.1) (2026-11-09)
+
+
+### Bug Fixes
+
+* package the renamed app and allow manual release rebuilds ([717fa7f](https://github.com/gempi/skoda-car-status/commit/717fa7fa3dd453e8bc20a531d33fcecb34feaa23))
+
 ## 1.0.0 (2026-11-09)
 
 
