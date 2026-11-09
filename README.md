@@ -28,6 +28,14 @@ open SkodaCarStatus.xcodeproj
 
 Then run the `SkodaCarStatus` scheme from Xcode. The app has no Dock icon; it lives in the menu bar.
 
+## Download
+
+Grab the latest `SkodaCarStatus-<version>.zip` from [Releases](https://github.com/gempi/skoda-car-status/releases). The app is not notarized, so on first launch right-click it and choose **Open** (or run `xattr -dr com.apple.quarantine SkodaCarStatus.app`).
+
+## Releases
+
+Commits to `main` use [Conventional Commits](https://www.conventionalcommits.org) (`feat:`, `fix:`, `feat!:`). [release-please](https://github.com/googleapis/release-please) keeps a release PR up to date; merging it tags the version, creates the GitHub release and attaches the built app.
+
 ## Setup
 
 1. Click the menu bar icon and open **Settings**.
