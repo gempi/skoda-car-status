@@ -63,7 +63,7 @@ struct BatteryView: View {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         VStack(alignment: .leading, spacing: 2) {
                             // A blank stands in for missing text so the block keeps its height, and the render with it.
-                            Text(model.vehicleName ?? " ").font(.title3.weight(.bold)).lineLimit(1)
+                            Text(model.vehicleName ?? " ").font(.title3).lineLimit(1)
                             let details = [model.licensePlate.flatMap { $0.isEmpty ? nil : $0 },
                                            model.odometerKm.map { "\($0.formatted()) km" }].compactMap { $0 }
                             Text(details.isEmpty ? " " : details.joined(separator: " · "))
@@ -106,8 +106,9 @@ struct BatteryView: View {
                 }
 
                 if let percent = battery.percent {
-                    ProgressView(value: Double(percent), total: 100)
-                        .tint(Self.barColor(for: percent))
+                    ChargeBar(fraction: Double(percent) / 100,
+                              color: Self.barColor(for: percent),
+                              isCharging: battery.chargingState == .charging)
                         .frame(height: 8)
                 }
             }
@@ -157,6 +158,41 @@ struct BatteryView: View {
         guard remaining >= 86400 else { return "API key expires today" }
         let days = Int((remaining / 86400).rounded(.up))
         return "API key expires in \(days) day\(days == 1 ? "" : "s")"
+    }
+}
+
+/// A capsule progress bar; while charging, a highlight sweeps across the filled part.
+private struct ChargeBar: View {
+    let fraction: Double
+    let color: Color
+    let isCharging: Bool
+
+    var body: some View {
+        GeometryReader { proxy in
+            let fillWidth = proxy.size.width * min(max(fraction, 0), 1)
+            ZStack(alignment: .leading) {
+                Capsule().fill(.quaternary)
+                Capsule()
+                    .fill(color)
+                    .frame(width: fillWidth)
+                    .overlay(alignment: .leading) {
+                        if isCharging { sweep(in: fillWidth) }
+                    }
+                    .clipShape(Capsule())
+            }
+        }
+    }
+
+    private func sweep(in fillWidth: CGFloat) -> some View {
+        let band = max(fillWidth * 0.4, 24)
+        return LinearGradient(colors: [.clear, .white.opacity(0.6), .clear], startPoint: .leading, endPoint: .trailing)
+            .frame(width: band)
+            // From fully off the left edge to fully off the right edge of the fill, then snap back.
+            .phaseAnimator([false, true]) { content, atEnd in
+                content.offset(x: atEnd ? fillWidth : -band)
+            } animation: { atEnd in
+                atEnd ? .linear(duration: 1.6) : nil
+            }
     }
 }
 
