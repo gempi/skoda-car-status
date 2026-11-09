@@ -1,0 +1,365 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		025C14A2AF6AF2CD1E01D077 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DE9FDA40E377A30647C3D267 /* Assets.xcassets */; };
+		27978972CF960F98CD81E2E4 /* CredentialsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80E654CF61F3E4F8E861CF6 /* CredentialsStore.swift */; };
+		35FEAA00F6490D7C0B152604 /* VehicleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20B3AFE15D8CA806FA7D770A /* VehicleModel.swift */; };
+		45C2B62482A1A957AF01F365 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73207A3A0DA441FAD22BC2BB /* Credentials.swift */; };
+		612C93EB9E9AD4B5F6CEF21F /* BatteryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 266F395AA4364E25BCCA375F /* BatteryView.swift */; };
+		72DE9D456A183D830CC1A9C4 /* SkodaAPI+Wire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C4B4E9410C0715CEE5225F /* SkodaAPI+Wire.swift */; };
+		8C4BFED3BAC631E74CB63347 /* SkodaCarStatusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F2710031DBB8918A4ABE5BB /* SkodaCarStatusApp.swift */; };
+		A1A0923A8BD693C9F7E6DE53 /* SkodaAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A55748C18D2E2A4B3C7A8F3 /* SkodaAPI.swift */; };
+		C543BB00D9D683F1A5A58E8D /* ParkingMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B0A69DD65C174B81BEFE7F /* ParkingMapView.swift */; };
+		CD2FF05FCE8416FFB63355A0 /* VehicleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36FC4A08A4EAF2775089D43D /* VehicleView.swift */; };
+		D051C2493847E5CB7A52241A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843ACA469092B98AFD1D0D92 /* SettingsView.swift */; };
+		D579A6BCC5593C66188E2FB8 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A12E07E7E7AB3488BCD8A1 /* Keychain.swift */; };
+		EFFF1E3C22C4EAAC2D01512F /* SkodaAPI+Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 024B6D4131ED3F76DEE9869D /* SkodaAPI+Errors.swift */; };
+		FC61B060DFE22D2151B35632 /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 806F9CF2D346783F5A8E8172 /* PopoverView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		024B6D4131ED3F76DEE9869D /* SkodaAPI+Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SkodaAPI+Errors.swift"; sourceTree = "<group>"; };
+		07C4B4E9410C0715CEE5225F /* SkodaAPI+Wire.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SkodaAPI+Wire.swift"; sourceTree = "<group>"; };
+		20B3AFE15D8CA806FA7D770A /* VehicleModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VehicleModel.swift; sourceTree = "<group>"; };
+		266F395AA4364E25BCCA375F /* BatteryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryView.swift; sourceTree = "<group>"; };
+		26B0A69DD65C174B81BEFE7F /* ParkingMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParkingMapView.swift; sourceTree = "<group>"; };
+		36FC4A08A4EAF2775089D43D /* VehicleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VehicleView.swift; sourceTree = "<group>"; };
+		48A12E07E7E7AB3488BCD8A1 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
+		6F2710031DBB8918A4ABE5BB /* SkodaCarStatusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkodaCarStatusApp.swift; sourceTree = "<group>"; };
+		73207A3A0DA441FAD22BC2BB /* Credentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credentials.swift; sourceTree = "<group>"; };
+		735EF07FBF3DEDC684D8A5F4 /* SkodaCarStatus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SkodaCarStatus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		806F9CF2D346783F5A8E8172 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
+		843ACA469092B98AFD1D0D92 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		8FB5000486B69FEC5AFEACD2 /* SkodaCarStatus.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SkodaCarStatus.entitlements; sourceTree = "<group>"; };
+		9A55748C18D2E2A4B3C7A8F3 /* SkodaAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkodaAPI.swift; sourceTree = "<group>"; };
+		A80E654CF61F3E4F8E861CF6 /* CredentialsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsStore.swift; sourceTree = "<group>"; };
+		DE9FDA40E377A30647C3D267 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		59F8F4545A0E65D897578B08 /* SkodaCarStatus */ = {
+			isa = PBXGroup;
+			children = (
+				DE9FDA40E377A30647C3D267 /* Assets.xcassets */,
+				266F395AA4364E25BCCA375F /* BatteryView.swift */,
+				8FB5000486B69FEC5AFEACD2 /* SkodaCarStatus.entitlements */,
+				6F2710031DBB8918A4ABE5BB /* SkodaCarStatusApp.swift */,
+				73207A3A0DA441FAD22BC2BB /* Credentials.swift */,
+				A80E654CF61F3E4F8E861CF6 /* CredentialsStore.swift */,
+				48A12E07E7E7AB3488BCD8A1 /* Keychain.swift */,
+				26B0A69DD65C174B81BEFE7F /* ParkingMapView.swift */,
+				806F9CF2D346783F5A8E8172 /* PopoverView.swift */,
+				843ACA469092B98AFD1D0D92 /* SettingsView.swift */,
+				9A55748C18D2E2A4B3C7A8F3 /* SkodaAPI.swift */,
+				024B6D4131ED3F76DEE9869D /* SkodaAPI+Errors.swift */,
+				07C4B4E9410C0715CEE5225F /* SkodaAPI+Wire.swift */,
+				20B3AFE15D8CA806FA7D770A /* VehicleModel.swift */,
+				36FC4A08A4EAF2775089D43D /* VehicleView.swift */,
+			);
+			path = SkodaCarStatus;
+			sourceTree = "<group>";
+		};
+		AF4DB785D998DC26B77BAA49 = {
+			isa = PBXGroup;
+			children = (
+				59F8F4545A0E65D897578B08 /* SkodaCarStatus */,
+				CBDB2FDEFFEB702175D26E05 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CBDB2FDEFFEB702175D26E05 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				735EF07FBF3DEDC684D8A5F4 /* SkodaCarStatus.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2092BB572D3597D0591F4A04 /* SkodaCarStatus */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D1936BA3A2FE427D77F322E1 /* Build configuration list for PBXNativeTarget "SkodaCarStatus" */;
+			buildPhases = (
+				12DADDC6E960A65359A43101 /* Sources */,
+				DA4C7C3F1CED90C538474ED5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SkodaCarStatus;
+			packageProductDependencies = (
+			);
+			productName = SkodaCarStatus;
+			productReference = 735EF07FBF3DEDC684D8A5F4 /* SkodaCarStatus.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D6715AD439FAAA21A9EA8037 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					2092BB572D3597D0591F4A04 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = D752BE47A4E6A18EF20FB442 /* Build configuration list for PBXProject "SkodaCarStatus" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = AF4DB785D998DC26B77BAA49;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = CBDB2FDEFFEB702175D26E05 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2092BB572D3597D0591F4A04 /* SkodaCarStatus */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DA4C7C3F1CED90C538474ED5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				025C14A2AF6AF2CD1E01D077 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		12DADDC6E960A65359A43101 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				612C93EB9E9AD4B5F6CEF21F /* BatteryView.swift in Sources */,
+				8C4BFED3BAC631E74CB63347 /* SkodaCarStatusApp.swift in Sources */,
+				45C2B62482A1A957AF01F365 /* Credentials.swift in Sources */,
+				27978972CF960F98CD81E2E4 /* CredentialsStore.swift in Sources */,
+				D579A6BCC5593C66188E2FB8 /* Keychain.swift in Sources */,
+				C543BB00D9D683F1A5A58E8D /* ParkingMapView.swift in Sources */,
+				FC61B060DFE22D2151B35632 /* PopoverView.swift in Sources */,
+				D051C2493847E5CB7A52241A /* SettingsView.swift in Sources */,
+				EFFF1E3C22C4EAAC2D01512F /* SkodaAPI+Errors.swift in Sources */,
+				72DE9D456A183D830CC1A9C4 /* SkodaAPI+Wire.swift in Sources */,
+				A1A0923A8BD693C9F7E6DE53 /* SkodaAPI.swift in Sources */,
+				35FEAA00F6490D7C0B152604 /* VehicleModel.swift in Sources */,
+				CD2FF05FCE8416FFB63355A0 /* VehicleView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		7A7B982ADFD08124E8C84F27 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = SkodaCarStatus/SkodaCarStatus.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = SkodaCarStatus/Info.plist;
+				INFOPLIST_PREPROCESS = YES;
+				INFOPLIST_PREPROCESSOR_DEFINITIONS = DEBUG;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ch.matthiasgemperli.SkodaCarStatus;
+				PRODUCT_NAME = "Car Status for Skoda";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		7E97F761EFD6AEE6BD3488AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		9572BA9D3B8DB01020EA010E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		DB9755934EA000106000FC5D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = SkodaCarStatus/SkodaCarStatus.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = SkodaCarStatus/Info.plist;
+				INFOPLIST_PREPROCESS = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ch.matthiasgemperli.SkodaCarStatus;
+				PRODUCT_NAME = "Car Status for Skoda";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D1936BA3A2FE427D77F322E1 /* Build configuration list for PBXNativeTarget "SkodaCarStatus" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7A7B982ADFD08124E8C84F27 /* Debug */,
+				DB9755934EA000106000FC5D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D752BE47A4E6A18EF20FB442 /* Build configuration list for PBXProject "SkodaCarStatus" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9572BA9D3B8DB01020EA010E /* Debug */,
+				7E97F761EFD6AEE6BD3488AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D6715AD439FAAA21A9EA8037 /* Project object */;
+}
