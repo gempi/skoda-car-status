@@ -3,6 +3,11 @@ name: Release
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to (re)build and attach the app to
+        required: true
 
 permissions:
   contents: write
@@ -10,6 +15,7 @@ permissions:
 
 jobs:
   release-please:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.rp.outputs.release_created }}
@@ -24,18 +30,23 @@ jobs:
 
   build:
     needs: release-please
-    if: needs.release-please.outputs.release_created == 'true'
+    if: >-
+      always() && (
+        needs.release-please.outputs.release_created == 'true' ||
+        github.event_name == 'workflow_dispatch'
+      )
     runs-on: macos-26
     env:
       GH_TOKEN: ${{ github.token }}
-      VERSION: ${{ needs.release-please.outputs.version }}
-      TAG: ${{ needs.release-please.outputs.tag_name }}
+      TAG: ${{ inputs.tag || needs.release-please.outputs.tag_name }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.release-please.outputs.tag_name }}
+          ref: ${{ inputs.tag || needs.release-please.outputs.tag_name }}
       - name: Build
         run: |
+          VERSION="${TAG#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           xcodebuild build \
             -project SkodaCarStatus.xcodeproj \
             -scheme SkodaCarStatus \
@@ -49,7 +60,7 @@ jobs:
       - name: Package
         run: |
           ditto -c -k --keepParent \
-            build/Build/Products/Release/SkodaCarStatus.app \
+            "build/Build/Products/Release/Car Status for Skoda.app" \
             "SkodaCarStatus-$VERSION.zip"
       - name: Upload to release
         run: gh release upload "$TAG" "SkodaCarStatus-$VERSION.zip" --clobber
