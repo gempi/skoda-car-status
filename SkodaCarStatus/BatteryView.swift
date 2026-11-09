@@ -167,6 +167,11 @@ private struct ChargeBar: View {
     let color: Color
     let isCharging: Bool
 
+    private let bandFraction = 0.4
+    private let minBandWidth: CGFloat = 24
+    private let highlightOpacity = 0.6
+    private let sweepDuration = 1.6
+
     var body: some View {
         GeometryReader { proxy in
             let fillWidth = proxy.size.width * min(max(fraction, 0), 1)
@@ -184,14 +189,14 @@ private struct ChargeBar: View {
     }
 
     private func sweep(in fillWidth: CGFloat) -> some View {
-        let band = max(fillWidth * 0.4, 24)
-        return LinearGradient(colors: [.clear, .white.opacity(0.6), .clear], startPoint: .leading, endPoint: .trailing)
+        let band = max(fillWidth * bandFraction, minBandWidth)
+        return LinearGradient(colors: [.clear, .white.opacity(highlightOpacity), .clear], startPoint: .leading, endPoint: .trailing)
             .frame(width: band)
             // From fully off the left edge to fully off the right edge of the fill, then snap back.
             .phaseAnimator([false, true]) { content, atEnd in
                 content.offset(x: atEnd ? fillWidth : -band)
             } animation: { atEnd in
-                atEnd ? .linear(duration: 1.6) : nil
+                atEnd ? .linear(duration: sweepDuration) : nil
             }
     }
 }
