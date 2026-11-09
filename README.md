@@ -30,7 +30,7 @@ Then run the `SkodaCarStatus` scheme from Xcode. The app has no Dock icon; it li
 
 ## Download
 
-Grab the latest `SkodaCarStatus-<version>.zip` from [Releases](https://github.com/gempi/skoda-car-status/releases). The app is not notarized, so on first launch right-click it and choose **Open** (or run `xattr -dr com.apple.quarantine SkodaCarStatus.app`).
+Grab the latest `SkodaCarStatus-<version>.zip` from [Releases](https://github.com/gempi/skoda-car-status/releases). The app is not notarized, so on first launch right-click it and choose **Open** (or run `xattr -dr com.apple.quarantine "Car Status for Skoda.app"`).
 
 ## Releases
 
