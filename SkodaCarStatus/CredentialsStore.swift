@@ -17,7 +17,7 @@ final class CredentialsStore {
 
     func reload() async {
         do {
-            saved = try await Task.detached { try Credentials.load() }.value
+            saved = try await Credentials.load()
             loadError = nil
         } catch {
             loadError = error.localizedDescription
@@ -29,7 +29,7 @@ final class CredentialsStore {
     func save(_ credentials: Credentials) async -> String? {
         let credentials = credentials.normalized
         do {
-            try await Task.detached { try credentials.save() }.value
+            try await credentials.save()
             saved = credentials
             return nil
         } catch {
@@ -40,7 +40,7 @@ final class CredentialsStore {
 
     func reset() async -> String? {
         do {
-            try await Task.detached { try Credentials.reset() }.value
+            try await Credentials.reset()
             saved = Credentials()
             return nil
         } catch {

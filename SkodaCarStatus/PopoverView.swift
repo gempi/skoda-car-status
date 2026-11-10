@@ -91,7 +91,6 @@ struct PopoverView: View {
 private struct MenuRow: View {
     let title: String
     var key: KeyEquivalent?
-    var symbol: String?
     var detail: Date?
     var disabled = false
     let action: () -> Void
@@ -115,9 +114,6 @@ private struct MenuRow: View {
                 Spacer()
                 if let key {
                     Text("⌘" + String(key.character).uppercased()).foregroundStyle(.secondary)
-                }
-                if let symbol {
-                    Image(systemName: symbol).foregroundStyle(.secondary)
                 }
             }
             .padding(.horizontal, 8)

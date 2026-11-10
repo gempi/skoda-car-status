@@ -4,9 +4,7 @@ import Foundation
 enum SkodaAPI {
     static let apiKeyHeader = "X-API-Key"
 
-    static var baseURL: URL {
-        URL(string: "https://public.api.connect.skoda-auto.cz")!
-    }
+    static let baseURL = URL(string: "https://public.api.connect.skoda-auto.cz")!
 
     enum ChargingState: Equatable, Sendable {
         case charging, conserving, readyToCharge, interrupted, discharging

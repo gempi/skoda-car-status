@@ -5,6 +5,8 @@ import SwiftUI
 struct ParkingMapView: View {
     let position: SkodaAPI.Position
 
+    private var name: String { VehicleModel.shared.vehicleName ?? "Car" }
+
     private var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude)
     }
@@ -14,7 +16,7 @@ struct ParkingMapView: View {
             center: coordinate,
             span: MKCoordinateSpan(latitudeDelta: 0.006, longitudeDelta: 0.006)
         )), interactionModes: []) {
-            Marker(VehicleModel.shared.vehicleName ?? "Car", systemImage: "car.fill", coordinate: coordinate)
+            Marker(name, systemImage: "car.fill", coordinate: coordinate)
         }
         .id(position)
         .frame(height: 140)
@@ -28,7 +30,7 @@ struct ParkingMapView: View {
 
     private func openInMaps() {
         let item = MKMapItem(location: CLLocation(latitude: position.latitude, longitude: position.longitude), address: nil)
-        item.name = VehicleModel.shared.vehicleName ?? "Car"
+        item.name = name
         item.openInMaps()
     }
 }

@@ -20,20 +20,25 @@ struct Credentials: Equatable, Sendable {
         )
     }
 
-    static func load() throws -> Credentials {
+    @concurrent
+    static func load() async throws -> Credentials {
         Credentials(
             vin: UserDefaults.standard.string(forKey: vinKey) ?? "",
             apiKey: try Keychain.get(.apiKey) ?? ""
         )
     }
 
-    func save() throws {
-        UserDefaults.standard.set(vin.isEmpty ? nil : vin, forKey: Self.vinKey)
+    @concurrent
+    func save() async throws {
+        // The key first: if it fails, the old VIN stays and the pair isn't half-saved.
         try Keychain.set(apiKey, for: .apiKey)
+        UserDefaults.standard.set(vin.isEmpty ? nil : vin, forKey: Self.vinKey)
     }
 
-    static func reset() throws {
-        UserDefaults.standard.removeObject(forKey: vinKey)
+    @concurrent
+    static func reset() async throws {
+        // The VIN goes even if the Keychain fails, so a locked keychain can't make a reset impossible.
+        defer { UserDefaults.standard.removeObject(forKey: vinKey) }
         try Keychain.delete(.apiKey)
     }
 }

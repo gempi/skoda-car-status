@@ -66,10 +66,7 @@ final class VehicleModel {
         do {
             let fetched = try await SkodaAPI.fetchVehicle(vin: credentials.vin, apiKey: credentials.apiKey)
             guard generation == self.generation else { return }
-            vehicle = fetched
-            if let position = fetched.parkingPosition { parkingPosition = position }
-            error = nil
-            lastUpdated = Date()
+            adopt(fetched)
         } catch is CancellationError {
             if generation == self.generation { lastAttempt = previousAttempt }
         } catch let failure as SkodaAPI.Failure {
@@ -80,6 +77,24 @@ final class VehicleModel {
             guard generation == self.generation else { return }
             self.error = error.localizedDescription
         }
+    }
+
+    /// Call when the credentials change and `fetched` came from a request made with the new ones (the settings connection test),
+    /// so that request isn't repeated: drops all old state, then starts from the response.
+    /// For the same vehicle the last parking position is kept, since the response omits it while the car is driving.
+    func switchCredentials(adopting fetched: SkodaAPI.Vehicle, keepingParkingPosition: Bool) {
+        let position = keepingParkingPosition ? parkingPosition : nil
+        clear()
+        lastAttempt = Date()
+        adopt(fetched)
+        if parkingPosition == nil { parkingPosition = position }
+    }
+
+    private func adopt(_ fetched: SkodaAPI.Vehicle) {
+        vehicle = fetched
+        if let position = fetched.parkingPosition { parkingPosition = position }
+        error = nil
+        lastUpdated = Date()
     }
 
     /// Call when the credentials change or are removed: drops all state, including rate-limit backoff, and any request in flight.

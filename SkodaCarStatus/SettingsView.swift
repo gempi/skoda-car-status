@@ -1,14 +1,10 @@
 import SwiftUI
 
 struct SettingsView: View {
-    private enum Status {
-        case failed(String)
-    }
-
     @Environment(\.dismiss) private var dismiss
     private let store = CredentialsStore.shared
     @State private var credentials = Credentials()
-    @State private var status: Status?
+    @State private var errorMessage: String?
     @State private var busy = false
     @State private var testTask: Task<Void, Never>?
     @State private var confirmingReset = false
@@ -84,8 +80,8 @@ struct SettingsView: View {
 
                 if let error = store.loadError {
                     Section { Text(error).foregroundStyle(.red) }
-                } else if case .failed(let error) = status {
-                    Section { Text(error).foregroundStyle(.red) }
+                } else if let errorMessage {
+                    Section { Text(errorMessage).foregroundStyle(.red) }
                 }
             }
             .formStyle(.grouped)
@@ -125,14 +121,10 @@ struct SettingsView: View {
         .onChange(of: credentials.vin) { _, new in
             if new.count > 17 { credentials.vin = String(new.prefix(17)) }
         }
-        .onChange(of: credentials) { show(nil) }
+        .onChange(of: credentials) { errorMessage = nil }
         .onChange(of: store.saved) { old, new in
             if credentials == old { credentials = new }
         }
-    }
-
-    private func show(_ newStatus: Status?) {
-        status = newStatus
     }
 
     private func cancel() {
@@ -144,26 +136,22 @@ struct SettingsView: View {
         let normalized = credentials.normalized
         testTask = Task {
             busy = true
-            show(nil)
+            errorMessage = nil
+            defer { busy = false }
+            let fetched: SkodaAPI.Vehicle
             do {
-                _ = try await SkodaAPI.fetchVehicle(vin: normalized.vin, apiKey: normalized.apiKey)
+                fetched = try await SkodaAPI.fetchVehicle(vin: normalized.vin, apiKey: normalized.apiKey)
             } catch {
-                busy = false
-                if !Task.isCancelled { show(.failed(error.localizedDescription)) }
+                if !Task.isCancelled { errorMessage = error.localizedDescription }
                 return
             }
-            guard !Task.isCancelled else {
-                busy = false
-                return
-            }
-            let error = await store.save(normalized)
-            busy = false
-            if let error {
-                show(.failed(error))
+            guard !Task.isCancelled else { return }
+            let sameVehicle = store.saved.vin == normalized.vin
+            if let error = await store.save(normalized) {
+                errorMessage = error
             } else {
                 credentials = store.saved
-                VehicleModel.shared.clear()
-                Task { await VehicleModel.shared.refresh() }
+                VehicleModel.shared.switchCredentials(adopting: fetched, keepingParkingPosition: sameVehicle)
                 dismiss()
             }
         }
@@ -172,14 +160,15 @@ struct SettingsView: View {
     private func reset() {
         Task {
             busy = true
+            defer { busy = false }
             let error = await store.reset()
-            busy = false
+            // Even a failed reset removes the VIN, so the old vehicle's data must go either way.
+            VehicleModel.shared.clear()
             if let error {
-                show(.failed(error))
+                errorMessage = error
             } else {
                 credentials = store.saved
-                VehicleModel.shared.clear()
-                show(nil)
+                errorMessage = nil
             }
         }
     }
