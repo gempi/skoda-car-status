@@ -82,6 +82,12 @@ struct PopoverView: View {
     }
 
     private func openSettings() {
+        if store.needsSetup {
+            SettingsRouter.shared.selection = .cars
+            SettingsRouter.shared.showingCarSheet = true
+        }
+        // Already a regular app when the window opens, so it comes up in front.
+        NSApp.setActivationPolicy(.regular)
         openWindow(id: AppInfo.settingsWindowID)
         NSApp.activate()
         popoverWindow?.close()
