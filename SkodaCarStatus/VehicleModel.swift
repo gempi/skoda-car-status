@@ -3,10 +3,46 @@ import Observation
 
 @MainActor @Observable
 final class VehicleModel {
-    static let shared = VehicleModel()
+    private static var models: [String: VehicleModel] = [:]
+
+    /// Each vehicle has its own model, so switching between vehicles shows cached data.
+    static func model(for vin: String) -> VehicleModel {
+        if let model = models[vin] { return model }
+        let model = VehicleModel(vin: vin)
+        models[vin] = model
+        return model
+    }
+
+    /// The model of the vehicle the popover and the menu bar show; `nil` only when there are no vehicles.
+    static var selected: VehicleModel? { CredentialsStore.shared.selectedVIN.map(model(for:)) }
+
+    /// Call when a vehicle is removed: drops its state and any request in flight.
+    static func forget(_ vin: String) {
+        models.removeValue(forKey: vin)?.clear()
+    }
+
+    /// The rate limit is per VIN, so every vehicle is polled, not just the selected one.
+    static func refreshAllIfStale() async {
+        let store = CredentialsStore.shared
+        await store.loadIfNeeded()
+        await withDiscardingTaskGroup { group in
+            for vehicle in store.vehicles {
+                // Looked up now, not in the task, which could run after the vehicle was removed and bring its model back.
+                let model = model(for: vehicle.vin)
+                group.addTask { await model.refreshIfStale() }
+            }
+        }
+    }
+
+    /// Seconds until the first vehicle is due for its next background poll.
+    static func nextPollDelay() -> TimeInterval {
+        CredentialsStore.shared.vehicles.map { model(for: $0.vin).nextPollDelay() }.min() ?? refreshInterval
+    }
 
     /// With 20 requests/hour per VIN, neither opening the popover nor the background poll may refetch more often than this.
     private static let refreshInterval: TimeInterval = 900
+
+    let vin: String
 
     private(set) var vehicle: SkodaAPI.Vehicle?
     /// Unlike `vehicle.parkingPosition`, this survives fetches made while the car is driving, when the API omits it.
@@ -18,6 +54,11 @@ final class VehicleModel {
     var battery: SkodaAPI.Battery? { vehicle?.battery }
     var chargingIssue: SkodaAPI.ChargingIssue? { vehicle?.chargingIssue }
     var vehicleName: String? { vehicle?.name }
+    /// The name from the API, or the end of the VIN until the vehicle has been fetched.
+    var displayName: String {
+        if let name = vehicleName, !name.isEmpty { return name }
+        return String(vin.suffix(6))
+    }
     var licensePlate: String? { vehicle?.licensePlate }
     var renderURL: URL? { vehicle?.renderURL }
     var odometerKm: Int? { vehicle?.odometerKm }
@@ -28,10 +69,13 @@ final class VehicleModel {
     private(set) var retryNotBefore: Date?
 
     private var lastAttempt: Date?
+    private var missedKey = false
     /// Bumped whenever the credentials change, so a response for the old credentials is discarded.
     private var generation = 0
 
-    private init() {}
+    private init(vin: String) {
+        self.vin = vin
+    }
 
     /// Seconds until the next background poll: `refreshInterval` after the last attempt, or later if the API asked us to wait.
     func nextPollDelay() -> TimeInterval {
@@ -42,7 +86,9 @@ final class VehicleModel {
 
     func refreshIfStale() async {
         if let retryNotBefore, retryNotBefore > Date() { return }
-        if let lastAttempt, Date().timeIntervalSince(lastAttempt) < Self.refreshInterval { return }
+        // A refresh that found no API key requested nothing, so once there is a key the next one doesn't wait.
+        let keyArrived = missedKey && CredentialsStore.shared.vehicle(for: vin)?.apiKey.isEmpty == false
+        if let lastAttempt, Date().timeIntervalSince(lastAttempt) < Self.refreshInterval, !keyArrived { return }
         await refresh()
     }
 
@@ -56,10 +102,16 @@ final class VehicleModel {
         defer { if generation == self.generation { isLoading = false } }
 
         let store = CredentialsStore.shared
-        if !store.isLoaded { await store.reload() }
+        await store.loadIfNeeded()
         guard generation == self.generation else { return }
-        let credentials = store.saved
-        guard credentials.isComplete else { return wipe() }
+        guard let credentials = store.vehicle(for: vin) else { return wipe() }
+        guard !credentials.apiKey.isEmpty else {
+            // The key may exist but be unreadable.
+            error = store.loadErrors[vin].map { "Couldn't read this vehicle's API key: \($0)" } ?? "No API key saved for this vehicle."
+            missedKey = true
+            return
+        }
+        missedKey = false
 
         if let retryNotBefore, retryNotBefore > Date() { return }
 
@@ -111,5 +163,6 @@ final class VehicleModel {
         lastUpdated = nil
         lastAttempt = nil
         retryNotBefore = nil
+        missedKey = false
     }
 }

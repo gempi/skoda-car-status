@@ -5,7 +5,7 @@ import SwiftUI
 struct ParkingMapView: View {
     let position: SkodaAPI.Position
 
-    private var name: String { VehicleModel.shared.vehicleName ?? "Car" }
+    let name: String
 
     private var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: position.latitude, longitude: position.longitude)

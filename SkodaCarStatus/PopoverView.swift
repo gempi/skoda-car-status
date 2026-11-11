@@ -6,26 +6,18 @@ struct PopoverView: View {
     @State private var popoverWindow: NSWindow?
 
     var body: some View {
+        let model = VehicleModel.selected
+
         VStack(alignment: .leading, spacing: 4) {
-            if let loadError = store.loadError {
-                Text("Couldn't read your saved settings: \(loadError)")
-                    .font(.callout)
-                    .foregroundStyle(.red)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+            if let model {
+                BatteryView(model: model)
 
-                Divider().padding(.horizontal, 8)
-            }
-
-            if store.saved.isComplete {
-                BatteryView()
-
-                if VehicleModel.shared.vehicle != nil {
-                    VehicleView()
+                if model.vehicle != nil {
+                    VehicleView(model: model)
                 }
 
-                if let position = VehicleModel.shared.parkingPosition {
-                    ParkingMapView(position: position)
+                if let position = model.parkingPosition {
+                    ParkingMapView(position: position, name: model.displayName)
                 }
 
                 Divider().padding(.horizontal, 8)
@@ -59,9 +51,9 @@ struct PopoverView: View {
 
             MenuRow(title: "Settings…", key: ",") { openSettings() }
 
-            if store.saved.isComplete {
-                MenuRow(title: "Refresh...", key: "r", detail: VehicleModel.shared.lastUpdated, disabled: VehicleModel.shared.isLoading) {
-                    Task { await VehicleModel.shared.refresh() }
+            if let model {
+                MenuRow(title: "Refresh...", key: "r", detail: model.lastUpdated, disabled: model.isLoading) {
+                    Task { await model.refresh() }
                 }
             }
 
@@ -74,17 +66,16 @@ struct PopoverView: View {
         .padding(8)
         .frame(width: 300)
         .background(WindowReader { popoverWindow = $0 })
-        .onAppear { Task { await VehicleModel.shared.refreshIfStale() } }
+        .onAppear { Task { await VehicleModel.refreshAllIfStale() } }
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { note in
             guard let window = note.object as? NSWindow, window === popoverWindow else { return }
-            Task { await VehicleModel.shared.refreshIfStale() }
+            Task { await VehicleModel.refreshAllIfStale() }
         }
     }
 
     private func openSettings(addingVehicle: Bool = false) {
-        SettingsRouter.shared.selection = addingVehicle ? .cars : .general
         if addingVehicle {
-            SettingsRouter.shared.showingCarSheet = true
+            SettingsRouter.shared.showingVehicleSheet = true
         }
         // Already a regular app when the window opens, so it comes up in front.
         NSApp.setActivationPolicy(.regular)

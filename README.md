@@ -39,7 +39,8 @@ Commits to `main` use [Conventional Commits](https://www.conventionalcommits.org
 ## Setup
 
 1. Click the menu bar icon and open **Settings**.
-2. Enter your API key and the 17-character VIN.
+2. Choose **Add Vehicle…** and enter the 17-character VIN and your API key.
+3. Repeat for more vehicles; with several, switch between them at the top of the popover.
 
 ## Disclaimer
 

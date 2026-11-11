@@ -9,8 +9,10 @@ enum Keychain {
         }
     }
 
-    enum Account: String {
-        case apiKey
+    struct Account {
+        let rawValue: String
+
+        static func apiKey(vin: String) -> Account { Account(rawValue: "apiKey.\(vin)") }
     }
 
     private static let service = Bundle.main.bundleIdentifier ?? "SkodaCarStatus"
