@@ -2,7 +2,9 @@ import ServiceManagement
 import SwiftUI
 
 enum SettingsPane: Hashable {
-    case general, cars
+    case general
+    /// One vehicle's pane, by VIN.
+    case vehicle(String)
 }
 
 /// Lets other views (the popover's "Add Vehicle") choose the pane the settings window shows.
@@ -12,7 +14,11 @@ final class SettingsRouter {
     var selection: SettingsPane? = .general {
         didSet { record() }
     }
-    var showingCarSheet = false
+    var showingVehicleSheet = false
+    /// Shown as an alert, since the pane of a removed vehicle is gone.
+    var removeError: String?
+    /// VINs of vehicles being removed: already gone from the sidebar, so they can't be opened again meanwhile.
+    var removing: Set<String> = []
 
     private var history: [SettingsPane] = [.general]
     private var position = 0
@@ -34,6 +40,17 @@ final class SettingsRouter {
         isNavigating = false
     }
 
+    /// Call when `pane`'s vehicle is removed: starts the history over, so it can't lead back to the pane,
+    /// and shows `replacement` if the pane is still the one on screen.
+    func replace(_ pane: SettingsPane, with replacement: SettingsPane) {
+        let current = selection == pane ? replacement : selection ?? .general
+        isNavigating = true
+        history = [current]
+        position = 0
+        selection = current
+        isNavigating = false
+    }
+
     private func record() {
         guard !isNavigating, let selection, selection != history[position] else { return }
         history.removeSubrange((position + 1)...)
@@ -44,6 +61,7 @@ final class SettingsRouter {
 
 struct SettingsView: View {
     @Bindable private var router = SettingsRouter.shared
+    private let store = CredentialsStore.shared
 
     var body: some View {
         NavigationSplitView {
@@ -51,15 +69,35 @@ struct SettingsView: View {
                 SidebarRow(title: "General", symbol: "gearshape.fill", color: .gray)
                     .tag(SettingsPane.general)
 
-                SidebarRow(title: "Cars", symbol: "car.fill", color: .blue)
-                    .tag(SettingsPane.cars)
+                Section("Vehicles") {
+                    ForEach(store.vehicles.filter { !router.removing.contains($0.vin) }) { vehicle in
+                        SidebarRow(title: VehicleModel.model(for: vehicle.vin).displayName, symbol: "car.fill", color: .blue)
+                            .tag(SettingsPane.vehicle(vehicle.vin))
+                    }
+
+                    Button { router.showingVehicleSheet = true } label: {
+                        Label("Add Vehicle…", systemImage: "plus")
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.secondary)
+                }
             }
             .navigationSplitViewColumnWidth(min: 210, ideal: 230, max: 300)
         } detail: {
-            switch router.selection ?? .general {
-            case .general: GeneralPane()
-            case .cars: CarsPane()
+            // A pane whose vehicle is gone falls back to General.
+            if case .vehicle(let vin) = router.selection, let vehicle = store.vehicle(for: vin) {
+                VehiclePane(vehicle: vehicle).id(vin)
+            } else {
+                GeneralPane()
             }
+        }
+        .sheet(isPresented: $router.showingVehicleSheet) { VehicleSheet() }
+        .alert("Couldn't delete the API key from your Keychain", isPresented: Binding(
+            get: { router.removeError != nil }, set: { if !$0 { router.removeError = nil } }
+        )) {
+            Button("OK") {}
+        } message: {
+            Text(router.removeError ?? "")
         }
         .toolbar {
             ToolbarItemGroup(placement: .navigation) {
@@ -71,7 +109,7 @@ struct SettingsView: View {
         }
         .frame(minWidth: 620, maxWidth: .infinity, minHeight: 400, maxHeight: .infinity)
         .background(DockPresence())
-        .onAppear { Task { await CredentialsStore.shared.reload() } }
+        .task { await store.reload() }
     }
 }
 
@@ -178,127 +216,141 @@ private struct GeneralPane: View {
     }
 }
 
-private struct CarsPane: View {
-    @Bindable private var router = SettingsRouter.shared
+private struct VehiclePane: View {
+    let vehicle: Credentials
     private let store = CredentialsStore.shared
+    @State private var editing = false
     @State private var confirmingRemove = false
-    @State private var removeError: String?
     @State private var removing = false
 
-    var body: some View {
-        Group {
-            if store.saved.isComplete {
-                Form {
-                    Section {
-                        LabeledContent("Name", value: VehicleModel.shared.vehicleName ?? "–")
-                        if let plate = VehicleModel.shared.licensePlate {
-                            LabeledContent("Licence plate", value: plate)
-                        }
-                        LabeledContent("VIN", value: store.saved.vin)
-                        HStack {
-                            Button("Remove…", role: .destructive) { confirmingRemove = true }
-                                .disabled(removing)
-                            Spacer()
-                            Button("Edit…") { router.showingCarSheet = true }
-                                .disabled(removing)
-                        }
-                    } footer: {
-                        Text("Only one car is supported for now.")
-                    }
+    private var model: VehicleModel { .model(for: vehicle.vin) }
 
-                    if let error = store.loadError ?? removeError {
-                        Section { Text(error).foregroundStyle(.red) }
-                    }
+    var body: some View {
+        Form {
+            Section {
+                LabeledContent("Name", value: model.vehicleName ?? "–")
+                if let plate = model.licensePlate {
+                    LabeledContent("Licence plate", value: plate)
                 }
-                .formStyle(.grouped)
-            } else {
-                ContentUnavailableView {
-                    Label("No Car Yet", systemImage: "car")
-                } description: {
-                    if let error = store.loadError ?? removeError {
-                        Text(error).foregroundStyle(.red)
-                    } else {
-                        Text("Add your car to see its battery and status.")
-                    }
-                } actions: {
-                    Button("Add Car…") { router.showingCarSheet = true }
-                        .buttonStyle(.borderedProminent)
-                    if store.loadError != nil {
-                        Button("Try Again") { Task { await store.reload() } }
-                    }
-                    if store.loadError != nil || store.saved != Credentials() {
-                        Button("Remove Saved Data…", role: .destructive) { confirmingRemove = true }
-                            .disabled(removing)
+                LabeledContent("VIN", value: vehicle.vin)
+                HStack {
+                    Button("Remove…", role: .destructive) { confirmingRemove = true }
+                        .disabled(removing)
+                    Spacer()
+                    Button("Edit…") { editing = true }
+                        .disabled(removing)
+                }
+            }
+
+            if let error = store.loadErrors[vehicle.vin] {
+                Section {
+                    Text(error).foregroundStyle(.red)
+                    Button("Try Again") {
+                        Task {
+                            await store.reload()
+                            // The key was just read again, so the popover's error goes too if it is there now.
+                            await model.refreshIfStale()
+                        }
                     }
                 }
             }
         }
-        .onChange(of: router.showingCarSheet) { removeError = nil }
-        .navigationTitle("Cars")
-        .toolbar {
-            ToolbarItem {
-                Button("Add Car", systemImage: "plus") { router.showingCarSheet = true }
-                    .disabled(store.saved.isComplete)
-                    .help(store.saved.isComplete ? "Only one car is supported for now" : "Add Car")
-            }
-        }
-        .sheet(isPresented: $router.showingCarSheet) { CarSheet() }
-        .confirmationDialog("Remove your car and API key?", isPresented: $confirmingRemove) {
-            Button("Remove Car", role: .destructive, action: remove)
+        .formStyle(.grouped)
+        .navigationTitle(model.displayName)
+        .sheet(isPresented: $editing) { VehicleSheet(editing: vehicle) }
+        .confirmationDialog("Remove \(model.displayName) and its API key?", isPresented: $confirmingRemove) {
+            Button("Remove Vehicle", role: .destructive, action: remove)
         }
     }
 
     private func remove() {
         guard !removing else { return }
+        removing = true
+        let vin = vehicle.vin
+        let router = SettingsRouter.shared
+        // Before the vehicle is gone, so the window doesn't sit on a pane that no longer exists while the Keychain is busy.
+        router.replace(.vehicle(vin), with: store.neighbour(of: vin, excluding: router.removing).map(SettingsPane.vehicle) ?? .general)
+        router.removing.insert(vin)
         Task {
-            removing = true
-            removeError = nil
-            defer { removing = false }
-            removeError = await store.reset()
-            // Even a failed reset removes the VIN, so the old vehicle's data must go either way.
-            VehicleModel.shared.clear()
+            // Only a failure is recorded, so removing another vehicle meanwhile can't hide it.
+            if let error = await store.remove(vin: vin) { router.removeError = error }
+            // Not if the vehicle was added again while the Keychain was busy: its model holds the new data.
+            if store.vehicle(for: vin) == nil { VehicleModel.forget(vin) }
+            router.removing.remove(vin)
         }
     }
 }
 
-/// Adds the car, or edits it when one is already saved.
-private struct CarSheet: View {
+/// Adds a vehicle, or changes the API key of `editing` when given. The VIN identifies a vehicle, so it can't be edited.
+private struct VehicleSheet: View {
+    var editing: Credentials?
+
     @Environment(\.dismiss) private var dismiss
     private let store = CredentialsStore.shared
     @State private var credentials = Credentials()
+    /// The key a new vehicle's field starts with: the selected vehicle's, since most vehicles share one account.
+    @State private var prefilledKey = ""
+    @State private var prefilledFrom = ""
+    @State private var applyKeyToOthers = true
     @State private var errorMessage: String?
     @State private var busy = false
+    /// Set once the vehicle is saved; the sheet is still on screen while it closes.
+    @State private var saved = false
     @State private var testTask: Task<Void, Never>?
     @State private var showKey = false
 
-    private var isEditing: Bool { store.saved.isComplete }
+    /// Not while saving or after it, when the vehicle found in the store is the one this sheet has just added.
+    private var isDuplicate: Bool {
+        editing == nil && !busy && !saved && store.vehicle(for: credentials.normalized.vin) != nil
+    }
 
     private var vinHint: String? {
         let vin = credentials.normalized.vin
+        if isDuplicate { return "This vehicle has already been added" }
         return vin.isEmpty || Credentials.isValidVIN(vin) ? nil : "VIN must be 17 letters or digits"
+    }
+
+    private var keyChanged: Bool { credentials.normalized.apiKey != editing?.apiKey }
+
+    /// The other vehicles saved with the key this one had: replacing a key in MyŠkoda breaks all of them.
+    private var othersWithOldKey: [Credentials] {
+        guard let editing, !editing.apiKey.isEmpty, keyChanged else { return [] }
+        return store.vehicles.filter { $0.vin != editing.vin && $0.apiKey == editing.apiKey }
     }
 
     private var canSave: Bool {
         let normalized = credentials.normalized
-        return !busy && store.loadError == nil && Credentials.isValidVIN(normalized.vin)
-            && !normalized.apiKey.isEmpty && normalized != store.saved
+        guard !busy, store.isLoaded, !normalized.apiKey.isEmpty else { return false }
+        if let editing { return normalized != editing }
+        return Credentials.isValidVIN(normalized.vin) && !isDuplicate
+    }
+
+    private var keyFooter: String {
+        if !prefilledKey.isEmpty, credentials.apiKey == prefilledKey {
+            return "Same key as \(prefilledFrom). Replace it if this vehicle is in another Škoda account."
+        }
+        return "In the MyŠkoda app under Profile / Smart Home. This key will be saved in your Keychain."
     }
 
     var body: some View {
         VStack(spacing: 0) {
             Form {
                 Section {
-                    LabeledContent("VIN") {
-                        TextField("VIN", text: $credentials.vin, prompt: Text("TMBxxxxxxxxxxxxxx"))
-                            .labelsHidden()
-                            .font(.body.monospaced())
-                            .multilineTextAlignment(.trailing)
-                            .autocorrectionDisabled()
+                    if let editing {
+                        LabeledContent("VIN", value: editing.vin)
+                    } else {
+                        LabeledContent("VIN") {
+                            TextField("VIN", text: $credentials.vin, prompt: Text("TMBxxxxxxxxxxxxxx"))
+                                .labelsHidden()
+                                .font(.body.monospaced())
+                                .multilineTextAlignment(.trailing)
+                                .autocorrectionDisabled()
+                        }
                     }
                 } footer: {
                     if let vinHint {
                         Text(vinHint).foregroundStyle(.red)
-                    } else {
+                    } else if editing == nil {
                         Text("In the MyŠkoda app under vehicle details, or on your registration document.")
                     }
                 }
@@ -325,13 +377,17 @@ private struct CarSheet: View {
                         Button(showKey ? "Hide" : "Show") { showKey.toggle() }
                             .controlSize(.small)
                     }
+
+                    let others = othersWithOldKey
+                    if !others.isEmpty {
+                        Toggle("Also use for ^[\(others.count) other vehicle](inflect: true) with the old key",
+                               isOn: $applyKeyToOthers)
+                    }
                 } footer: {
-                    Text("In the MyŠkoda app under Profile / Smart Home. This key will be saved in your Keychain.")
+                    Text(keyFooter)
                 }
 
-                if let error = store.loadError {
-                    Section { Text(error).foregroundStyle(.red) }
-                } else if let errorMessage {
+                if let errorMessage {
                     Section { Text(errorMessage).foregroundStyle(.red) }
                 }
             }
@@ -346,11 +402,11 @@ private struct CarSheet: View {
                     dismiss()
                 }
                 .keyboardShortcut(.cancelAction)
-                Button(action: testConnection) {
+                Button(action: save) {
                     if busy {
                         ProgressView().controlSize(.small)
                     } else {
-                        Text(isEditing ? "Test & Save" : "Test & Add")
+                        Text(editing == nil ? "Test & Add" : "Test & Save")
                     }
                 }
                 .buttonStyle(.borderedProminent)
@@ -362,39 +418,78 @@ private struct CarSheet: View {
         }
         .frame(width: 440)
         .fixedSize(horizontal: false, vertical: true)
-        .onAppear { credentials = store.saved }
+        .onAppear {
+            prefilledKey = editing == nil ? store.selected?.apiKey ?? "" : ""
+            prefilledFrom = VehicleModel.selected?.displayName ?? ""
+            credentials = editing ?? Credentials(apiKey: prefilledKey)
+        }
         .onDisappear { testTask?.cancel() }
         .onChange(of: credentials.vin) { _, new in
-            if new.count > 17 { credentials.vin = String(new.prefix(17)) }
+            // Trimmed first, so whitespace pasted along with a VIN doesn't push its last characters out.
+            let trimmed = new.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.count > 17 { credentials.vin = String(trimmed.prefix(17)) }
         }
         .onChange(of: credentials) { errorMessage = nil }
-        .onChange(of: store.saved) { old, new in
-            if credentials == old { credentials = new }
-        }
     }
 
-    private func testConnection() {
+    private func save() {
         let normalized = credentials.normalized
+        let others = applyKeyToOthers ? othersWithOldKey.map(\.vin) : []
+        guard !busy else { return }
+        // Claimed before the task starts, so a second trigger can't start another.
+        busy = true
         testTask = Task {
-            busy = true
             errorMessage = nil
             defer { busy = false }
-            let fetched: SkodaAPI.Vehicle
-            do {
-                fetched = try await SkodaAPI.fetchVehicle(vin: normalized.vin, apiKey: normalized.apiKey)
-            } catch {
-                if !Task.isCancelled { errorMessage = error.localizedDescription }
-                return
+            // The key replaces the other vehicles' too, so it is tested with each of them, not just this one.
+            typealias Outcome = Result<SkodaAPI.Vehicle, any Error>
+            let vins = [normalized.vin] + others
+            let outcomes = await withTaskGroup(of: (String, Outcome).self) { group in
+                for vin in vins {
+                    group.addTask {
+                        do {
+                            return (vin, .success(try await SkodaAPI.fetchVehicle(vin: vin, apiKey: normalized.apiKey)))
+                        } catch {
+                            return (vin, .failure(error))
+                        }
+                    }
+                }
+                var outcomes: [String: Outcome] = [:]
+                for await (vin, outcome) in group { outcomes[vin] = outcome }
+                return outcomes
             }
             guard !Task.isCancelled else { return }
-            let sameVehicle = store.saved.vin == normalized.vin
-            if let error = await store.save(normalized) {
-                errorMessage = error
-            } else {
-                credentials = store.saved
-                VehicleModel.shared.switchCredentials(adopting: fetched, keepingParkingPosition: sameVehicle)
-                dismiss()
+            var fetched: [String: SkodaAPI.Vehicle] = [:]
+            // This vehicle first, so its own failure is the one shown.
+            for vin in vins {
+                switch outcomes[vin] {
+                case .success(let vehicle)?:
+                    fetched[vin] = vehicle
+                case .failure(let error)?:
+                    errorMessage = vin == normalized.vin
+                        ? error.localizedDescription
+                        : "The key doesn't work for \(VehicleModel.model(for: vin).displayName): \(error.localizedDescription)"
+                    return
+                case nil:
+                    return
+                }
             }
+            let error = await store.save(normalized, alsoApplyingKeyTo: others)
+            // Before the error is handled: a save that failed part-way has still given some vehicles the new key.
+            for (vin, vehicle) in fetched where store.vehicle(for: vin)?.apiKey == normalized.apiKey {
+                VehicleModel.model(for: vin).switchCredentials(adopting: vehicle, keepingParkingPosition: editing != nil)
+            }
+            if let error {
+                errorMessage = error
+                return
+            }
+            // Cancelled too late to stop the save: the vehicle is added, but nothing switches to it.
+            if editing == nil, !Task.isCancelled {
+                store.select(normalized.vin)
+                SettingsRouter.shared.selection = .vehicle(normalized.vin)
+            }
+            saved = true
+            dismiss()
         }
     }
 }

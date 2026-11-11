@@ -12,8 +12,8 @@ struct SkodaCarStatusApp: App {
         // Poll in the background, measured from the last attempt, so any other refresh (popover open, manual, wake) pushes the next poll out.
         Task {
             while !Task.isCancelled {
-                await VehicleModel.shared.refreshIfStale()
-                try? await Task.sleep(for: .seconds(VehicleModel.shared.nextPollDelay()))
+                await VehicleModel.refreshAllIfStale()
+                try? await Task.sleep(for: .seconds(VehicleModel.nextPollDelay()))
             }
         }
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -22,7 +22,7 @@ struct SkodaCarStatusApp: App {
             // The network is often not back yet right at wake.
             Task { @MainActor in
                 try? await Task.sleep(for: .seconds(5))
-                await VehicleModel.shared.refreshIfStale()
+                await VehicleModel.refreshAllIfStale()
             }
         }
     }
@@ -34,7 +34,7 @@ struct SkodaCarStatusApp: App {
             PopoverView()
         } label: {
             Image("MenuBarIcon")
-            if showBatteryInMenuBar, let percent = VehicleModel.shared.battery?.percent {
+            if showBatteryInMenuBar, let percent = VehicleModel.selected?.battery?.percent {
                 Text(" \(percent)%")
             }
         }

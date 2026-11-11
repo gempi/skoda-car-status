@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The charging plug and state, the overall lock state and whether the car is parked, one row each; rows the vehicle doesn't report are left out.
 struct VehicleView: View {
-    private let model = VehicleModel.shared
+    let model: VehicleModel
 
     private struct Row: Identifiable {
         var title: String

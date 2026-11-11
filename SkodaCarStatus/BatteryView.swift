@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct BatteryView: View {
-    private let model = VehicleModel.shared
+    let model: VehicleModel
 
     @ViewBuilder
     private func errorText(_ error: String) -> some View {
@@ -31,6 +31,10 @@ struct BatteryView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
+            // Without a card there would be no way to switch away from a vehicle that has no battery data.
+            if model.battery == nil && CredentialsStore.shared.vehicles.count > 1 {
+                VehicleTitle(model: model)
+            }
             if let error = model.error {
                 errorText(error)
             }
@@ -62,8 +66,8 @@ struct BatteryView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         VStack(alignment: .leading, spacing: 2) {
+                            VehicleTitle(model: model)
                             // A blank stands in for missing text so the block keeps its height, and the render with it.
-                            Text(model.vehicleName ?? " ").font(.title3).lineLimit(1)
                             let details = [model.licensePlate.flatMap { $0.isEmpty ? nil : $0 },
                                            model.odometerKm.map { "\($0.formatted()) km" }].compactMap { $0 }
                             Text(details.isEmpty ? " " : details.joined(separator: " · "))
@@ -158,6 +162,46 @@ struct BatteryView: View {
         guard remaining >= 86400 else { return "API key expires today" }
         let days = Int((remaining / 86400).rounded(.up))
         return "API key expires in \(days) day\(days == 1 ? "" : "s")"
+    }
+}
+
+/// The selected vehicle's name. With more than one vehicle it is also the menu that chooses
+/// which vehicle the popover and the menu bar show.
+private struct VehicleTitle: View {
+    let model: VehicleModel
+    private let store = CredentialsStore.shared
+
+    var body: some View {
+        if store.vehicles.count > 1 {
+            Menu {
+                Picker("Vehicle", selection: Binding(get: { store.selectedVIN }, set: { store.select($0) })) {
+                    ForEach(store.vehicles) { vehicle in
+                        Text(VehicleModel.model(for: vehicle.vin).displayName).tag(Optional(vehicle.vin))
+                    }
+                }
+                .pickerStyle(.inline)
+                .labelsHidden()
+            } label: {
+                HStack(spacing: 4) {
+                    name
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .contentShape(Rectangle())
+            }
+            .menuStyle(.button)
+            .buttonStyle(.plain)
+            .menuIndicator(.hidden)
+            // Only vertically, so a long name is truncated like the plain one.
+            .fixedSize(horizontal: false, vertical: true)
+        } else {
+            name
+        }
+    }
+
+    private var name: some View {
+        Text(model.displayName).font(.title3).lineLimit(1)
     }
 }
 
