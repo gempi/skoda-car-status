@@ -24,7 +24,8 @@ final class VehicleModel {
     /// The rate limit is per VIN, so every vehicle is polled, not just the selected one.
     static func refreshAllIfStale() async {
         let store = CredentialsStore.shared
-        await store.loadIfNeeded()
+        // Here, once for all vehicles, not in each one's refresh.
+        await store.retryFailedKeys()
         await withDiscardingTaskGroup { group in
             for vehicle in store.vehicles {
                 // Looked up now, not in the task, which could run after the vehicle was removed and bring its model back.

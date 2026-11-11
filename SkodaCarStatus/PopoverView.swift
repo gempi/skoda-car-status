@@ -53,7 +53,10 @@ struct PopoverView: View {
 
             if let model {
                 MenuRow(title: "Refresh...", key: "r", detail: model.lastUpdated, disabled: model.isLoading) {
-                    Task { await model.refresh() }
+                    Task {
+                        await store.retryFailedKeys()
+                        await model.refresh()
+                    }
                 }
             }
 

@@ -33,9 +33,14 @@ final class CredentialsStore {
         await serially(reloading: true) {}
     }
 
-    /// Waits for a load already under way instead of starting another. Loads again while a key couldn't be read,
-    /// so a Keychain that was still locked at launch doesn't leave the vehicles without keys until the app restarts.
+    /// Waits for a load already under way instead of starting another.
     func loadIfNeeded() async {
+        await serially {}
+    }
+
+    /// Loads again if a key couldn't be read, so a Keychain that was still locked at launch
+    /// doesn't leave the vehicles without keys until the app restarts.
+    func retryFailedKeys() async {
         await serially(reloading: !loadErrors.isEmpty) {}
     }
 

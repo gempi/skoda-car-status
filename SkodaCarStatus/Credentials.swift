@@ -31,7 +31,7 @@ struct Credentials: Equatable, Sendable, Identifiable {
         var errors: [String: String] = [:]
 
         // What couldn't be deleted when its vehicle was removed is tried again; what still fails waits for the next load.
-        try? deleteKeys()
+        deleteKeys()
 
         for index in vehicles.indices {
             do {
@@ -60,7 +60,8 @@ struct Credentials: Equatable, Sendable, Identifiable {
 
     @concurrent
     static func deleteKey(vin: String) async throws {
-        try deleteKeys(adding: vin)
+        // Only its own key: another vehicle's that fails again isn't this removal's failure.
+        if let failure = deleteKeys(adding: vin)[vin] { throw failure }
     }
 
     private static var pendingDeletions: [String] {
@@ -72,25 +73,26 @@ struct Credentials: Equatable, Sendable, Identifiable {
     }
 
     /// Deletes the key of `vin` and whatever earlier calls couldn't delete; what fails now is kept for the next call,
-    /// which every load makes, so no key stays in the Keychain for good. Tries all of them, then throws the first failure.
-    private static func deleteKeys(adding vin: String? = nil) throws {
+    /// which every load makes, so no key stays in the Keychain for good. Tries all of them and returns the failures, by VIN.
+    @discardableResult
+    private static func deleteKeys(adding vin: String? = nil) -> [String: any Error] {
         var pending = pendingDeletions
         if let vin, !pending.contains(vin) {
             pending.append(vin)
             // Recorded before the Keychain is asked: it can block on a prompt, and the app may quit meanwhile.
             setPendingDeletions(pending)
         }
-        var failure: Error?
+        var failures: [String: any Error] = [:]
         pending.removeAll { vin in
             do {
                 try Keychain.delete(.apiKey(vin: vin))
                 return true
             } catch {
-                failure = failure ?? error
+                failures[vin] = error
                 return false
             }
         }
         setPendingDeletions(pending)
-        if let failure { throw failure }
+        return failures
     }
 }

@@ -245,7 +245,13 @@ private struct VehiclePane: View {
             if let error = store.loadErrors[vehicle.vin] {
                 Section {
                     Text(error).foregroundStyle(.red)
-                    Button("Try Again") { Task { await store.reload() } }
+                    Button("Try Again") {
+                        Task {
+                            await store.reload()
+                            // The key was just read again, so the popover's error goes too if it is there now.
+                            await model.refreshIfStale()
+                        }
+                    }
                 }
             }
         }
@@ -268,7 +274,8 @@ private struct VehiclePane: View {
         Task {
             // Only a failure is recorded, so removing another vehicle meanwhile can't hide it.
             if let error = await store.remove(vin: vin) { router.removeError = error }
-            VehicleModel.forget(vin)
+            // Not if the vehicle was added again while the Keychain was busy: its model holds the new data.
+            if store.vehicle(for: vin) == nil { VehicleModel.forget(vin) }
             router.removing.remove(vin)
         }
     }
