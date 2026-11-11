@@ -44,7 +44,6 @@ final class SettingsRouter {
 
 struct SettingsView: View {
     @Bindable private var router = SettingsRouter.shared
-    private let store = CredentialsStore.shared
 
     var body: some View {
         NavigationSplitView {
@@ -72,6 +71,7 @@ struct SettingsView: View {
         }
         .frame(minWidth: 620, maxWidth: .infinity, minHeight: 400, maxHeight: .infinity)
         .background(DockPresence())
+        .onAppear { Task { await CredentialsStore.shared.reload() } }
     }
 }
 
@@ -82,7 +82,12 @@ private struct DockPresence: NSViewRepresentable {
         private var closeObserver: Any?
 
         override func viewDidMoveToWindow() {
-            guard let window, closeObserver == nil else { return }
+            guard let window else {
+                closeObserver.map(NotificationCenter.default.removeObserver)
+                closeObserver = nil
+                return
+            }
+            guard closeObserver == nil else { return }
             NSApp.setActivationPolicy(.regular)
             DispatchQueue.main.async {
                 NSApp.activate()
@@ -120,10 +125,14 @@ private struct SidebarRow: View {
 
 private struct GeneralPane: View {
     @AppStorage(AppInfo.showBatteryInMenuBarKey) private var showBatteryInMenuBar = false
-    @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
+    @State private var launchAtLogin = false
     @State private var launchError: String?
+    @State private var needsApproval = false
 
-    private var launchServiceEnabled: Bool { SMAppService.mainApp.status == .enabled }
+    /// `.requiresApproval` means the item is registered but switched off in System Settings, so it still counts as on here.
+    private var launchServiceEnabled: Bool {
+        [.enabled, .requiresApproval].contains(SMAppService.mainApp.status)
+    }
 
     private func setLaunchAtLogin(_ enabled: Bool) {
         guard enabled != launchServiceEnabled else { return }
@@ -134,6 +143,7 @@ private struct GeneralPane: View {
             launchError = error.localizedDescription
         }
         launchAtLogin = launchServiceEnabled
+        needsApproval = SMAppService.mainApp.status == .requiresApproval
     }
 
     var body: some View {
@@ -149,11 +159,20 @@ private struct GeneralPane: View {
             } footer: {
                 if let launchError {
                     Text(launchError).foregroundStyle(.red)
+                } else if needsApproval {
+                    HStack {
+                        Text("Allow Skoda Car Status under Login Items in System Settings.")
+                        Button("Open Settings") { SMAppService.openSystemSettingsLoginItems() }
+                            .buttonStyle(.link)
+                    }
                 }
             }
         }
         .formStyle(.grouped)
-        .onAppear { launchAtLogin = launchServiceEnabled }
+        .onAppear {
+            launchAtLogin = launchServiceEnabled
+            needsApproval = SMAppService.mainApp.status == .requiresApproval
+        }
         .onChange(of: launchAtLogin) { _, enabled in setLaunchAtLogin(enabled) }
         .navigationTitle("General")
     }
@@ -206,13 +225,15 @@ private struct CarsPane: View {
                         .buttonStyle(.borderedProminent)
                     if store.loadError != nil {
                         Button("Try Again") { Task { await store.reload() } }
+                    }
+                    if store.loadError != nil || store.saved != Credentials() {
                         Button("Remove Saved Data…", role: .destructive) { confirmingRemove = true }
                             .disabled(removing)
                     }
                 }
             }
         }
-        .onAppear { Task { await store.reload() } }
+        .onChange(of: router.showingCarSheet) { removeError = nil }
         .navigationTitle("Cars")
         .toolbar {
             ToolbarItem {
