@@ -44,6 +44,7 @@ struct SkodaCarStatusApp: App {
             SettingsView()
         }
         .defaultLaunchBehavior(.suppressed)
-        .windowResizability(.contentSize)
+        .windowResizability(.contentMinSize)
+        .defaultSize(width: 720, height: 460)
     }
 }

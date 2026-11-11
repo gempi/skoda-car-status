@@ -42,6 +42,7 @@ final class CredentialsStore {
         do {
             try await Credentials.reset()
             saved = Credentials()
+            loadError = nil
             return nil
         } catch {
             await reload()
