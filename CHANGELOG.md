@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/gempi/skoda-car-status/compare/v1.1.0...v1.2.0) (2026-11-11)
+
+
+### Features
+
+* support multiple vehicles ([#6](https://github.com/gempi/skoda-car-status/issues/6)) ([12452be](https://github.com/gempi/skoda-car-status/commit/12452bea334d3437ee504e7cccbb32e8533509c1))
+
 ## [1.1.0](https://github.com/gempi/skoda-car-status/compare/v1.0.2...v1.1.0) (2026-11-11)
 
 
