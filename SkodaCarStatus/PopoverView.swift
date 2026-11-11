@@ -45,7 +45,7 @@ struct PopoverView: View {
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
 
-                    Button("Add Vehicle", action: openSettings)
+                    Button("Add Vehicle") { openSettings(addingVehicle: true) }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
                         .padding(.top, 4)
@@ -57,7 +57,7 @@ struct PopoverView: View {
                 Divider().padding(.horizontal, 8)
             }
 
-            MenuRow(title: "Settings…", key: ",", action: openSettings)
+            MenuRow(title: "Settings…", key: ",") { openSettings() }
 
             if store.saved.isComplete {
                 MenuRow(title: "Refresh...", key: "r", detail: VehicleModel.shared.lastUpdated, disabled: VehicleModel.shared.isLoading) {
@@ -81,9 +81,9 @@ struct PopoverView: View {
         }
     }
 
-    private func openSettings() {
-        if store.needsSetup {
-            SettingsRouter.shared.selection = .cars
+    private func openSettings(addingVehicle: Bool = false) {
+        SettingsRouter.shared.selection = addingVehicle ? .cars : .general
+        if addingVehicle {
             SettingsRouter.shared.showingCarSheet = true
         }
         // Already a regular app when the window opens, so it comes up in front.
