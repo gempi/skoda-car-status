@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/gempi/skoda-car-status/compare/v1.0.2...v1.1.0) (2026-11-11)
+
+
+### Features
+
+* redesign settings as a sidebar window with General and Cars panes ([#4](https://github.com/gempi/skoda-car-status/issues/4)) ([61596e8](https://github.com/gempi/skoda-car-status/commit/61596e80e87dd2f1acfb8b2fa73791c59a498694))
+
 ## [1.0.2](https://github.com/gempi/skoda-car-status/compare/v1.0.1...v1.0.2) (2026-11-09)
 
 
