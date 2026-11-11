@@ -65,18 +65,24 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationSplitView {
-            List(selection: $router.selection) {
-                SidebarRow(title: "General", symbol: "gearshape.fill", color: .gray)
-                    .tag(SettingsPane.general)
+            List {
+                SidebarRow(title: "General", symbol: "gearshape.fill", color: .gray, isSelected: router.selection == .general) {
+                    router.selection = .general
+                }
 
                 Section("Vehicles") {
                     ForEach(store.vehicles.filter { !router.removing.contains($0.vin) }) { vehicle in
-                        SidebarRow(title: VehicleModel.model(for: vehicle.vin).displayName, symbol: "car.fill", color: .blue)
-                            .tag(SettingsPane.vehicle(vehicle.vin))
+                        SidebarRow(
+                            title: VehicleModel.model(for: vehicle.vin).displayName, symbol: "car.fill", color: .blue,
+                            symbolSize: 9, isSelected: router.selection == .vehicle(vehicle.vin)
+                        ) {
+                            router.selection = .vehicle(vehicle.vin)
+                        }
                     }
 
                     Button { router.showingVehicleSheet = true } label: {
                         Label("Add Vehicle…", systemImage: "plus")
+                            .alignedWithSectionHeader()
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(.secondary)
@@ -143,21 +149,41 @@ private struct DockPresence: NSViewRepresentable {
     func updateNSView(_ view: View, context: Context) {}
 }
 
+private extension View {
+    /// Pulls a row's icon left, onto the line where the "Vehicles" header text starts.
+    func alignedWithSectionHeader() -> some View { offset(x: -6) }
+}
+
 private struct SidebarRow: View {
     let title: String
     let symbol: String
     let color: Color
+    var symbolSize: CGFloat = 11
+    let isSelected: Bool
+    let action: () -> Void
 
     var body: some View {
-        Label {
-            Text(title)
-        } icon: {
-            Image(systemName: symbol)
-                .font(.system(size: 11))
-                .foregroundStyle(.white)
-                .frame(width: 20, height: 20)
-                .background(color.gradient, in: RoundedRectangle(cornerRadius: 5))
+        Button(action: action) {
+            Label {
+                Text(title).fontWeight(isSelected ? .semibold : .regular)
+            } icon: {
+                Image(systemName: symbol)
+                    .font(.system(size: symbolSize))
+                    .foregroundStyle(.white)
+                    .frame(width: 20, height: 20)
+                    .background(color.gradient, in: RoundedRectangle(cornerRadius: 5))
+            }
+            .alignedWithSectionHeader()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .listRowBackground(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(isSelected ? Color.primary.opacity(0.08) : .clear)
+                .padding(.horizontal, 6)
+        )
     }
 }
 
@@ -421,7 +447,8 @@ private struct VehicleSheet: View {
         .onAppear {
             prefilledKey = editing == nil ? store.selected?.apiKey ?? "" : ""
             prefilledFrom = VehicleModel.selected?.displayName ?? ""
-            credentials = editing ?? Credentials(apiKey: prefilledKey)
+            // A new vehicle only gets the key, so the VIN field isn't rewritten right after it appears.
+            if let editing { credentials = editing } else { credentials.apiKey = prefilledKey }
         }
         .onDisappear { testTask?.cancel() }
         .onChange(of: credentials.vin) { _, new in
