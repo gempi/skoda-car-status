@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/gempi/skoda-car-status/compare/v1.2.0...v1.2.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* use a neutral selection highlight in the settings sidebar ([#8](https://github.com/gempi/skoda-car-status/issues/8)) ([5e10be1](https://github.com/gempi/skoda-car-status/commit/5e10be1b019a42bbf1538c03b9eb4952183bad7c))
+
 ## [1.2.0](https://github.com/gempi/skoda-car-status/compare/v1.1.0...v1.2.0) (2026-11-11)
 
 
